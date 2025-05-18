@@ -1,14 +1,8 @@
 import mysql.connector
 import dbconfig as cfg
 
+
 class QueenDAO:
-    connection=""
-    cursor =''
-    host=       ''
-    user=       ''
-    password=   ''
-    database=   ''
-    
     def __init__(self):
         self.host=       cfg.mysql['host']
         self.user=       cfg.mysql['user']
@@ -31,7 +25,7 @@ class QueenDAO:
          
     def getAll(self):
         cursor = self.getcursor()
-        sql="select * from book"
+        sql="select id, name, age_on_show, season, place, city from queen"
         cursor.execute(sql)
         results = cursor.fetchall()
         returnArray = []
@@ -45,7 +39,7 @@ class QueenDAO:
 
     def findByID(self, id):
         cursor = self.getcursor()
-        sql="select * from queen where id = %s"
+        sql="select id, name, age_on_show, season, place, city from queen where id = %s"
         values = (id,)
 
         cursor.execute(sql, values)
@@ -56,7 +50,7 @@ class QueenDAO:
 
     def create(self, queen):
         cursor = self.getcursor()
-        sql="insert into book (name, age_on_show, season, place, city) values (%s,%s,%s,%s,%s)"
+        sql="insert into queen (name, age_on_show, season, place, city) values (%s,%s,%s,%s,%s)"
         values = (queen.get("name"), queen.get("age_on_show"), queen.get("season"), queen.get("place"), queen.get("city"))
         cursor.execute(sql, values)
 
