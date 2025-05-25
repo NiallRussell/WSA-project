@@ -1,0 +1,375 @@
+<html>
+    <head>
+        <style>
+        body {
+            background-color: #e0f7fa !important;
+        }
+        button {
+            background-color: #ffb6c1;
+            color: #222;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #ffaec9;
+        }
+        </style>
+        <title> view Queens</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body>
+        <h1 style="text-align: center;">Queens of RuPaul's Drag Race</h1>
+        <div>
+            <button id="showCreateButton" onclick="showCreate()">Create</button>
+            <button id="compareCitiesButton" onclick="compareCities()">Compare Cities</button>
+            <button id="averageAgeButton" onclick="averageAgeOfFirstPlace()">Average Age of First Place Queens</button>
+            <button id="listFranchisesButton" onclick="listFranchises()">List All Franchises</button>
+        </div>
+        <div id="citiesResult"></div>
+        <div id="franchiseResult"></div>
+        <div>
+            <table class="table" id="queenTable">
+                <tr>
+                        <th>id</th>
+                        <th>Name</th>
+                        <th>
+                            Age on Show
+                        </th>
+                        <th>Season</th>
+                        <th>Place</th>
+                        <th>City</th>
+                        <th>Update</th>
+                        <th>Delete</th>
+                </tr>
+
+            </table>
+        </div>
+
+
+
+        <div id='createUpdateForm' style="display: none">
+                <h2><span id="createLabel">Create a</span> <span id="updateLabel">update</span> Queen</h2>
+                <input type="hidden" name="id"/>
+                Name <input type="text" name="name" /><br/>
+                Age on Show <input type="number" name="age_on_show"/> <br/>
+                Season <input type="number" name="season"/> <br/>
+                Place <input type="number" name="place"/> <br/>
+                City <input type="text" name="city"/> <br/>
+                <span><button id="doCreateButton" onclick="doCreate()">Create</button></span>
+                <span><button id="doUpdateButton" onclick="doUpdate()">Update</button></span>
+        </div>
+    </body>
+    <script>
+    function showCreate(){
+        document.getElementById('citiesResult').innerHTML = '';
+        document.getElementById('franchiseResult').innerHTML = '';
+        document.getElementById('showCreateButton').style.display="none"
+        document.getElementById('queenTable').style.display="none"
+        document.getElementById('createUpdateForm').style.display="block"
+
+        document.getElementById('createLabel').style.display="inline"
+        document.getElementById('updateLabel').style.display="none"
+
+        document.getElementById('doCreateButton').style.display="block"
+        document.getElementById('doUpdateButton').style.display="none"
+
+    }
+    function showViewAll(){
+        document.getElementById('showCreateButton').style.display="block"
+        document.getElementById('queenTable').style.display="block"
+        document.getElementById('createUpdateForm').style.display="none"
+    }
+    function showUpdate(buttonElement){
+        document.getElementById('showCreateButton').style.display="none"
+        document.getElementById('queenTable').style.display="none"
+        document.getElementById('createUpdateForm').style.display="block"
+
+        document.getElementById('createLabel').style.display="none"
+        document.getElementById('updateLabel').style.display="inline"
+
+        document.getElementById('doCreateButton').style.display="none"
+        document.getElementById('doUpdateButton').style.display="block"
+
+
+        var rowElement = buttonElement.parentNode.parentNode
+
+        var queen = getQueenFromRow(rowElement)
+        populateFormWithQueen(queen)
+    }
+    function doCreate(){
+        var form = document.getElementById('createUpdateForm')
+
+        var queen = {}
+
+        queen.name = form.querySelector('input[name="name"]').value
+        queen.age_on_show = form.querySelector('input[name="age_on_show"]').value
+        queen.season = form.querySelector('input[name="season"]').value
+        queen.place = form.querySelector('input[name="place"]').value
+        queen.city = form.querySelector('input[name="city"]').value
+        console.log(JSON.stringify(queen))
+        createQueenAjax(queen)
+
+
+    }
+    function doUpdate(){
+        var queen = getQueenFromForm();
+        var rowElement = document.getElementById(queen.id);
+        updateQueenAjax(queen);
+        setQueenInRow(rowElement,queen);
+
+        clearForm();
+        showViewAll();
+    }
+    function doDelete(r){
+        var tableElement = document.getElementById('queenTable');
+        var rowElement = r.parentNode.parentNode;
+        var index = rowElement.rowIndex;
+        deleteQueenAjax(rowElement.getAttribute("id"));
+        tableElement.deleteRow(index);
+    }
+    function addQueenToTable(queen){
+        var tableElement = document.getElementById('queenTable')
+        var rowElement = tableElement.insertRow(-1)
+        rowElement.setAttribute('id',queen.id)
+        var cell1 = rowElement.insertCell(0);
+        cell1.innerHTML = queen.id
+        var cell2 = rowElement.insertCell(1);
+        cell2.innerHTML = queen.name
+        var cell3 = rowElement.insertCell(2);
+        cell3.innerHTML = queen.age_on_show
+        var cell4 = rowElement.insertCell(3);
+        cell4.innerHTML = queen.season
+        var cell5 = rowElement.insertCell(4);
+        cell5.innerHTML = queen.place
+        var cell6 = rowElement.insertCell(5);
+        cell6.innerHTML = queen.city
+        var cell7 = rowElement.insertCell(6);
+        cell7.innerHTML = '<button onclick="showUpdate(this)">Update</button>'
+        var cell8 = rowElement.insertCell(7);
+        cell8.innerHTML = '<button onclick=doDelete(this)>Delete</button>'
+
+    }
+
+    function clearForm(){
+        var form = document.getElementById('createUpdateForm')
+
+        form.querySelector('input[name="name"]').value=''
+        form.querySelector('input[name="age_on_show"]').value=''
+        form.querySelector('input[name="season"]').value=''
+        form.querySelector('input[name="place"]').value=''
+        form.querySelector('input[name="city"]').value=''
+    }
+    function getQueenFromRow(rowElement){
+        var car ={}
+        queen.id  = rowElement.getAttribute('id')
+        queen.name = rowElement.cells[1].firstChild.textContent
+        queen.age_on_show = parseInt(rowElement.cells[2].firstChild.textContent,10)
+        queen.season = parseInt(rowElement.cells[3].firstChild.textContent,10)
+        queen.place = parseInt(rowElement.cells[4].firstChild.textContent,10)
+        queen.city = rowElement.cells[5].firstChild.textContent
+        return queen
+    }
+    function setQueenInRow(rowElement, queen){
+        rowElement.cells[0].firstChild.textContent= queen.id
+        rowElement.cells[1].firstChild.textContent= queen.name
+        rowElement.cells[2].firstChild.textContent= queen.age_on_show
+        rowElement.cells[3].firstChild.textContent= queen.season
+        rowElement.cells[4].firstChild.textContent= queen.place
+        rowElement.cells[5].firstChild.textContent= queen.city
+    }
+    function populateFormWithQueen(queen){
+        var form = document.getElementById('createUpdateForm')
+        form.querySelector('input[name="id"]').disabled = true
+
+        form.querySelector('input[name="id"]').value  = queen.id
+        form.querySelector('input[name="name"]').value= queen.name
+        form.querySelector('input[name="age_on_show"]').value= queen.age_on_show
+        form.querySelector('input[name="season"]').value= queen.season
+        form.querySelector('input[name="place"]').value= queen.place
+        form.querySelector('input[name="city"]').value= queen.city
+        return queen
+    }
+    function getQueenFromForm(){
+        var form = document.getElementById('createUpdateForm')
+        var queen = {}
+        queen.id = form.querySelector('input[name="id"]').value
+        queen.name = form.querySelector('input[name="name"]').value
+        queen.age_on_show = parseInt(form.querySelector('input[name="age_on_show"]').value, 10)
+        queen.season = parseInt(form.querySelector('input[name="season"]').value,10)
+        queen.place = parseInt(form.querySelector('input[name="place"]').value,10)
+        queen.city = form.querySelector('input[name="city"]').value
+        console.log(JSON.stringify(queen))
+        return queen
+    }
+    function getAllAjax(){
+        $.ajax({
+            "url": "/queen",
+            "method":"GET",
+            "data":"",
+            "dataType": "JSON",
+            "success":function(result){
+                //console.log(result);
+                for (queen of result){
+                    addQueenToTable(queen);
+                }
+
+            },
+            "error":function(xhr,status,error){
+                console.log("error: "+status+" msg:"+error);
+            }
+        });
+
+    }
+    function createQueenAjax(queen){
+        //var queen = {"name":"Latrice Royale", "age_on_show":39,"season":4, "place":4, "city": "South Beach"}
+        console.log(JSON.stringify(queen));
+        $.ajax({
+            "url": "/queen",
+            "method":"POST",
+            "data":JSON.stringify(queen),
+            "dataType": "JSON",
+            contentType: "application/json; charset=utf-8",
+            "success":function(result){
+                //console.log(result);
+                queen.id = result.id
+                addQueenToTable(queen)
+                clearForm()
+                showViewAll()
+            },
+            "error":function(xhr,status,error){
+                console.log("error: "+status+" msg:"+error);
+            }
+        });
+    }
+    function updateQueenAjax(queen){
+        //var queen = {"name":"Latrice Royale", "age_on_show":39,"season":4, "place":4, "city": "South Beach"}
+        console.log(JSON.stringify(queen));
+        $.ajax({
+            "url": "/queen/"+encodeURI(queen.id),
+            "method":"PUT",
+            "data":JSON.stringify(queen),
+            "dataType": "JSON",
+            contentType: "   ; charset=utf-8",
+            "success":function(result){
+               // console.log(result);
+
+            },
+            "error":function(xhr,status,error){
+                console.log("error: "+status+" msg:"+error);
+            }
+        });
+    }
+    function deleteQueenAjax(id){
+
+        //console.log(JSON.stringify('deleting '+id));
+        $.ajax({
+            "url": "/queen/"+encodeURI(id),
+            "method":"DELETE",
+            "data":"",
+            "dataType": "JSON",
+            contentType: "application/json; charset=utf-8",
+            "success":function(result){
+                //console.log(result);
+
+            },
+            "error":function(xhr,status,error){
+                console.log("error: "+status+" msg:"+error);
+            }
+        });
+    }
+    function compareCities() {
+    $.ajax({
+        url: "/queen",
+        method: "GET",
+        dataType: "json",
+        success: function(result) {
+            var cityStats = {};
+            result.forEach(function(queen) {
+                var city = queen.city;
+                var place = parseInt(queen.place, 10);
+                if (!cityStats[city]) cityStats[city] = [];
+                cityStats[city].push(place);
+            });
+
+            // Compute averages and collect into an array
+            var averages = [];
+            for (var city in cityStats) {
+                var places = cityStats[city];
+                var sum = places.reduce(function(acc, val) { return acc + val; }, 0);
+                var avg = sum / places.length;
+                averages.push({ city: city, avg: avg });
+            }
+
+            // Sort by average (lowest to highest)
+            averages.sort(function(a, b) { return a.avg - b.avg; });
+
+            // Build HTML
+            var resultHtml = "<h3>Average Placement by City</h3><ul>";
+            averages.forEach(function(entry) {
+                resultHtml += "<li>" + entry.city + ": " + entry.avg.toFixed(2) + "</li>";
+            });
+            resultHtml += "</ul>";
+            document.getElementById('citiesResult').innerHTML = resultHtml;
+            document.getElementById('franchiseResult').innerHTML = ''
+        },
+        error: function(xhr, status, error){
+            document.getElementById('citiesResult').innerHTML =
+                "Error fetching data: "+error;
+        }
+    });
+}
+
+    function averageAgeOfFirstPlace() {
+    $.ajax({
+        url: "/queen",
+        method: "GET",
+        dataType: "json",
+        success: function(result) {
+            var firstPlaceQueens = result.filter(function(queen) {
+                return parseInt(queen.place, 10) === 1;
+            });
+
+            var ages = firstPlaceQueens.map(function(queen) {
+                return parseInt(queen.age_on_show, 10);
+            });
+            var sum = ages.reduce(function(acc, val) { return acc + val; }, 0);
+            var avg = sum / ages.length;
+            document.getElementById('franchiseResult').innerHTML = '';
+            document.getElementById('citiesResult').innerHTML =
+                "Average age of queens in first place: " + avg.toFixed(2);
+        },
+        error: function(xhr, status, error){
+            document.getElementById('citiesResult').innerHTML =
+                "Error fetching data: "+error;
+        }
+    });
+}
+    function listFranchises() {
+    $.ajax({
+        url: "/franchise",
+        method: "GET",
+        dataType: "json",
+        success: function(result) {
+            var html = "<h3>All Drag Race Franchises</h3><ul>";
+            result.forEach(function(franchise) {
+                html += "<li>" + franchise.name + "</li>";
+            });
+            html += "</ul>";
+            document.getElementById('citiesResult').innerHTML = ''
+            document.getElementById('franchiseResult').innerHTML = html;
+        },
+        error: function(xhr, status, error){
+            document.getElementById('franchiseResult').innerHTML =
+                "Error fetching franchises: "+error;
+        }
+    });
+}
+    getAllAjax();
+
+
+
+    </script>
+</html>
