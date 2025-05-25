@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, abort
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-cors = CORS(app) 
+cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 from queenDAO import queenDAO
@@ -35,10 +35,10 @@ def findById(id):
 @app.route('/queen', methods=['POST'])
 @cross_origin()
 def create():
-    
+
     if not request.json:
         abort(400)
-    # other checking 
+    # other checking
     queen = {
         "name": request.json['name'],
         "age_on_show": request.json['age_on_show'],
@@ -47,7 +47,7 @@ def create():
         "city": request.json['city']
     }
     addedqueen = queenDAO.create(queen)
-    
+
     return jsonify(addedqueen)
 
 #curl  -i -H "Content-Type:application/json" -X PUT -d "{\"title\":\"hello\",\"author\":\"someone\",\"price\":123}" http://127.0.0.1:5000/queen/1
@@ -57,7 +57,7 @@ def update(id):
     foundQueen = queenDAO.findByID(id)
     if not foundQueen:
         abort(404)
-    
+
     if not request.json:
         abort(400)
     reqJson = request.json
@@ -80,9 +80,6 @@ def update(id):
         foundQueen['city'] = reqJson['city']
     queenDAO.update(id,foundQueen)
     return jsonify(foundQueen)
-        
-
-    
 
 @app.route('/queen/<int:id>' , methods=['DELETE'])
 @cross_origin()
@@ -90,6 +87,23 @@ def delete(id):
     queenDAO.delete(id)
     return jsonify({"done":True})
 
+
+@app.route('/franchise')
+@cross_origin()
+def getAllFranchises():
+    results = queenDAO.getAllFranchises()
+    return jsonify(results)
+
+@app.route('/franchise', methods=['POST'])
+@cross_origin()
+def createFranchise():
+    if not request.json or 'name' not in request.json:
+        abort(400)
+    franchise = {
+        "name": request.json['name']
+    }
+    addedfranchise = queenDAO.createFranchise(franchise)
+    return jsonify(addedfranchise)
 
 
 
