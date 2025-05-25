@@ -9,7 +9,7 @@ class QueenDAO:
         self.password=   cfg.mysql['password']
         self.database=   cfg.mysql['database']
 
-    def getcursor(self): 
+    def getcursor(self):
         self.connection = mysql.connector.connect(
             host=       self.host,
             user=       self.user,
@@ -22,7 +22,7 @@ class QueenDAO:
     def closeAll(self):
         self.connection.close()
         self.cursor.close()
-         
+
     def getAll(self):
         cursor = self.getcursor()
         sql="select id, name, age_on_show, season, place, city from queen"
@@ -33,7 +33,7 @@ class QueenDAO:
         for result in results:
             #print(result)
             returnArray.append(self.convertToDictionary(result))
-        
+
         self.closeAll()
         return returnArray
 
@@ -69,7 +69,7 @@ class QueenDAO:
         cursor.execute(sql, values)
         self.connection.commit()
         self.closeAll()
-        
+
     def delete(self, id):
         cursor = self.getcursor()
         sql="delete from queen where id = %s"
@@ -79,7 +79,7 @@ class QueenDAO:
 
         self.connection.commit()
         self.closeAll()
-        
+
         print("queen deleted")
 
     def convertToDictionary(self, resultLine):
@@ -88,8 +88,39 @@ class QueenDAO:
         currentkey = 0
         for attrib in resultLine:
             queen[attkeys[currentkey]] = attrib
-            currentkey = currentkey + 1 
+            currentkey = currentkey + 1
         return queen
 
-        
+    def getAllFranchises(self):
+        cursor = self.getcursor()
+        sql = "SELECT id, name FROM franchise"
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        returnArray = []
+        for result in results:
+            returnArray.append(self.convertToFranchiseDict(result))
+        self.closeAll()
+        return returnArray
+
+    def createFranchise(self, franchise):
+        cursor = self.getcursor()
+        sql = "INSERT INTO franchise (name) VALUES (%s)"
+        values = (franchise.get("name"),)
+        cursor.execute(sql, values)
+        self.connection.commit()
+        newid = cursor.lastrowid
+        franchise["id"] = newid
+        self.closeAll()
+        return franchise
+
+    def convertToFranchiseDict(self, resultLine):
+        attkeys=['id','name']
+        franchise = {}
+        currentkey = 0
+        for attrib in resultLine:
+            franchise[attkeys[currentkey]] = attrib
+            currentkey = currentkey + 1
+        return franchise
+
+
 queenDAO = QueenDAO()
