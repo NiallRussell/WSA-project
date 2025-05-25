@@ -27,6 +27,7 @@
             <button id="compareCitiesButton" onclick="compareCities()">Compare Cities</button>
             <button id="averageAgeButton" onclick="averageAgeOfFirstPlace()">Average Age of First Place Queens</button>
             <button id="listFranchisesButton" onclick="listFranchises()">List All Franchises</button>
+            <button id="compareQueenCountsButton" onclick="compareQueenCounts()">Compare Queen Counts by Season</button>
         </div>
         <div id="citiesResult"></div>
         <div id="franchiseResult"></div>
@@ -374,6 +375,34 @@
         error: function(xhr, status, error){
             document.getElementById('franchiseResult').innerHTML =
                 "Error fetching franchises: "+error;
+        }
+    });
+}
+
+    function compareQueenCounts() {
+    document.getElementById('createUpdateForm').style.display = "none";
+    document.getElementById('queenTable').style.display = "block";
+    document.getElementById('showCreateButton').style.display = "";
+
+    $.ajax({
+        url: "/season-stats",
+        method: "GET",
+        dataType: "json",
+        success: function(result) {
+
+            var html = "<h3>Queen Count Comparison by Season</h3><table class='table'><tr><th>Season</th><th>Expected Queens</th><th>Actual Queens</th></tr>";
+            result.forEach(function(seasonStat) {
+                html += "<tr><td>" + seasonStat.season + "</td><td>"
+                        + seasonStat.expected_count + "</td><td>"
+                        + seasonStat.actual_count + "</td></tr>";
+            });
+            html += "</table>";
+            document.getElementById('citiesResult').innerHTML = html;
+            document.getElementById('franchiseResult').innerHTML = '';
+        },
+        error: function(xhr, status, error){
+            document.getElementById('citiesResult').innerHTML =
+                "Error fetching season stats: "+error;
         }
     });
 }

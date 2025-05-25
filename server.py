@@ -105,6 +105,10 @@ def createFranchise():
     addedfranchise = queenDAO.createFranchise(franchise)
     return jsonify(addedfranchise)
 
+@app.route('/season-stats', methods=['GET'])
+def season_stats():
+    result = queenDAO.get_season_queen_counts()
+    return jsonify(result)
 
 
 if __name__ == '__main__' :

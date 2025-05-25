@@ -122,5 +122,26 @@ class QueenDAO:
             currentkey = currentkey + 1
         return franchise
 
+    def get_season_queen_counts(self):
+        cursor = self.getcursor()
+        cursor.execute("SELECT season, queen_count FROM seasons")
+        seasons = cursor.fetchall()
+
+        cursor.execute("SELECT season, COUNT(*) AS cnt FROM queen GROUP BY season")
+        actuals = cursor.fetchall()
+
+        actuals_dict = {row[0]: row[1] for row in actuals}
+
+        result = []
+        for s in seasons:
+            actual_count = actuals_dict.get(s[0], 0)
+            result.append({
+                'season': s[0],
+                'expected_count': s[1],
+                'actual_count': actual_count
+            })
+        self.closeAll()
+        return result
+
 
 queenDAO = QueenDAO()
