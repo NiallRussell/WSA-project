@@ -14,7 +14,7 @@ app = Flask(__name__, static_url_path='', static_folder='.')
 def index():
     return "Hello, Hello, Hello!"
 
-#curl "http://127.0.0.1:5000/queen"
+#curl "https://niallrussell93.pythonanywhere.com/queen"
 @app.route('/queen')
 @cross_origin()
 def getAll():
@@ -22,7 +22,7 @@ def getAll():
     results = queenDAO.getAll()
     return jsonify(results)
 
-#curl "http://127.0.0.1:5000/queen/2"
+#curl "https://niallrussell93.pythonanywhere.com/queen/2"
 @app.route('/queen/<int:id>')
 @cross_origin()
 def findById(id):
@@ -30,7 +30,7 @@ def findById(id):
 
     return jsonify(foundQueen)
 
-#curl  -i -H "Content-Type:application/json" -X POST -d "{\"name\":\"Latrice Royale\", \"age_on_show\":39, \"season\":4, \"place\":4,\"city\":\"South Beach\"}" http://127.0.0.1:5000/queen
+#curl  -i -H "Content-Type:application/json" -X POST -d "{\"name\":\"Latrice Royale\", \"age_on_show\":39, \"season\":4, \"place\":4,\"city\":\"South Beach\"}" https://niallrussell93.pythonanywhere.com/queen
 
 @app.route('/queen', methods=['POST'])
 @cross_origin()
@@ -50,7 +50,7 @@ def create():
 
     return jsonify(addedqueen)
 
-#curl  -i -H "Content-Type:application/json" -X PUT -d "{\"title\":\"hello\",\"author\":\"someone\",\"price\":123}" http://127.0.0.1:5000/queen/1
+#curl  -i -H "Content-Type:application/json" -X PUT -d "{\"name\":\"Alaska\", \"age_on_show\":27, \"season\":5, \"place\":2,\"city\":\"Pittsburgh\"}" http://127.0.0.1:5000/queen/18
 @app.route('/queen/<int:id>', methods=['PUT'])
 @cross_origin()
 def update(id):
