@@ -81,6 +81,7 @@
         document.getElementById('showCreateButton').style.display="block"
         document.getElementById('queenTable').style.display="block"
         document.getElementById('createUpdateForm').style.display="none"
+        document.getElementById('showCreateButton').style.display = "block"
     }
     function showUpdate(buttonElement){
         document.getElementById('showCreateButton').style.display="none"
@@ -281,6 +282,9 @@
         });
     }
     function compareCities() {
+        document.getElementById('createUpdateForm').style.display = "none";
+        document.getElementById('queenTable').style.display = "block";
+        document.getElementById('showCreateButton').style.display = "";
     $.ajax({
         url: "/queen",
         method: "GET",
@@ -323,6 +327,9 @@
 }
 
     function averageAgeOfFirstPlace() {
+        document.getElementById('createUpdateForm').style.display = "none";
+        document.getElementById('queenTable').style.display = "block";
+        document.getElementById('showCreateButton').style.display = "";
     $.ajax({
         url: "/queen",
         method: "GET",
@@ -348,6 +355,9 @@
     });
 }
     function listFranchises() {
+        document.getElementById('createUpdateForm').style.display = "none";
+        document.getElementById('queenTable').style.display = "block";
+        document.getElementById('showCreateButton').style.display = "";
     $.ajax({
         url: "/franchise",
         method: "GET",
@@ -372,4 +382,4 @@
 
 
     </script>
-</html>
+</html> 
